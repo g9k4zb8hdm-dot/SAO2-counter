@@ -816,6 +816,16 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
 .settingBullets b{display:block;font-size:10px;color:#fff;margin-bottom:3px}
 .settingBullets span{display:block;font-size:9px;color:#bac9dc;line-height:1.5}
 
+
+/* v2.3: 当選時入力方式。上部は累計ゲーム数のみ表示 */
+.gameRowTop.cumulativeOnly{grid-template-columns:1fr!important}
+.gameRowTop.cumulativeOnly .totalGamesBox{min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px!important;text-align:center}
+.gameRowTop.cumulativeOnly .statValue{font-size:34px}
+.cumulativeNote{margin-top:5px;font-size:11px;line-height:1.45;text-align:center}
+.histHead{grid-template-columns:60px 92px 78px minmax(0,1fr) 42px!important}
+.histRow{grid-template-columns:60px 92px 78px minmax(0,1fr) 42px!important}
+.histHead>div:nth-child(2){font-size:10px;white-space:nowrap}
+@media(max-width:390px){.histHead,.histRow{grid-template-columns:54px 84px 70px minmax(0,1fr) 38px!important}.histHead>div:nth-child(2){font-size:9px}}
 </style>
 
   <!-- PWA / iPhone Home Screen -->
@@ -857,18 +867,11 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
           <button id="investPlus10000" class="smallBtn blue">+10,000円</button>
         </div>
       </div>
-      <div class="gameRowTop">
+      <div class="gameRowTop cumulativeOnly">
         <div class="statBox totalGamesBox">
           <div class="statLabel">累計ゲーム数</div>
           <div id="totalGames" class="statValue">0G</div>
-        </div>
-        <div class="gameBox currentGameBox">
-          <div class="statLabel" style="text-align:center">今回ゲーム数</div>
-          <div class="gameMain"><button id="m1" class="round">−</button><div id="currentGame" class="bigG">0G</div><button id="p1" class="round">＋</button></div>
-          <div class="gameRow">
-            <button id="m10" class="smallBtn">-10G</button><button id="p10" class="smallBtn">+10G</button>
-            <button id="a50" class="smallBtn">+50G</button><button id="a100" class="smallBtn">+100G</button>
-          </div>
+          <div class="muted cumulativeNote">CZ/AT当選時の「CZ/AT間ゲーム数」＋ATゲーム数を自動集計</div>
         </div>
       </div>
     </div>
@@ -911,7 +914,7 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
     <div class="card">
       <div class="sectionTitle"><span>当選履歴（最新順）</span><button id="clearHistory" class="smallBtn danger" style="min-height:32px">全削除</button></div>
       <div class="historySummary"><div id="historyCzSummary" class="sum cz">CZ 0回 / 累計0G</div><div id="historyAtSummary" class="sum at">AT 0回 / 累計0G</div></div>
-      <div class="histHead"><div>種別</div><div>今回G</div><div>液晶G</div><div>ボイス</div><div></div></div>
+      <div class="histHead"><div>種別</div><div>CZ/AT間G</div><div>液晶G</div><div>ボイス</div><div></div></div>
       <div id="historyCompact"></div>
     </div>
 
@@ -972,7 +975,7 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
       <div class="atFooterActions">
         <button id="finishATBtn" class="atFinish">AT終了・結果を記録</button>
       </div>
-      <div class="atBackNote">AT終了後は通常画面へ戻り、今回ゲーム数は0Gから再開します。</div>
+      <div class="atBackNote">AT終了後は通常画面へ戻ります。次回のCZ/AT当選時に、AT終了後からのCZ/AT間ゲーム数を入力してください。</div>
     </div>
   </section>
 
@@ -1159,7 +1162,8 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
   <div class="modal">
     <div class="modalHead"><h2>スコードロンバトル（CZ）記録</h2><button class="close" onclick="closeModal('czModal')">×</button></div>
     <div class="formGrid">
-      <div><div class="label">液晶ゲーム数</div><input id="czLcd" type="number" inputmode="numeric" min="0" placeholder="例：250"></div>
+      <div><div class="label">CZ/AT間ゲーム数</div><input id="czGames" type="number" inputmode="numeric" min="0" placeholder="例：230"></div>
+      <div><div class="label">液晶ゲーム数</div><input id="czLcd" type="number" inputmode="numeric" min="0" placeholder="例：500"></div>
       <div><div class="label">当選契機</div><select id="czTrigger"><option>ゾーン</option><option>CZ間天井</option><option>バレットカウンター</option><option>強チェリー</option><option>チャンス目A</option><option>チャンス目B</option></select></div>
       <div><div class="label">推定モード</div><select id="czMode"><option value="">未入力</option><option>A</option><option>B</option><option>C</option><option>D</option><option>天国</option></select></div>
       <div><div class="label">終了画面ボイス</div><select id="czVoice"><option value="">未選択</option><option value="白">白｜信じてるから……</option><option value="青">青｜一緒に頑張ろ……ね</option><option value="黄">黄｜私とあたるまで 勝ち上がって来なさいよ</option><option value="緑">緑｜キリト……あなたの強さの理由を見させてもらうわ</option><option value="赤">赤｜へカートⅡ……お願い。弱い私に、力を貸して。</option><option value="紫">紫｜LUKガン上げなのあなた!? だからかぁ……</option></select></div>
@@ -1176,7 +1180,7 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
   <div class="modal">
     <div class="modalHead"><h2>バレット・オブ・バレッツ（AT）記録</h2><button class="close" onclick="closeModal('atModal')">×</button></div>
     <div class="formGrid">
-      <div><div class="label">当選契機</div><select id="atTrigger"><option>スコードロンバトル（CZ）</option><option>GGO詩乃モード</option><option>7図柄打ち抜き</option><option>中段チェリー</option></select></div>
+      <div><div class="label">当選契機</div><select id="atTrigger"><option>スコードロンバトル（CZ）</option><option>GGO詩乃モード</option><option>7図柄打ち抜き</option><option>中段チェリー</option><option>引き戻し</option></select></div>
       <div><div class="label">獲得枚数</div><input id="atCoins" type="number" inputmode="numeric" min="0" placeholder="例：1250"></div>
       <div class="full"><div class="label">終了画面</div><select id="endScreen"><option value="">未選択</option><option>キリト&シノン（デフォルト）</option><option>制服（奇数示唆）</option><option>ソファー（偶数示唆）</option><option>木漏れ日（高設定示唆）</option><option>夏祭り（高設定示唆強）</option><option>幼少期（設定5以上⁉︎）</option><option>ワイシャツ（2以上）</option><option>お風呂（3以上）</option><option>水着（4以上）</option><option>パジャマ（6濃厚）</option><option>誕生日（示唆なし）</option></select></div>
       <div><div class="label">トロフィー</div><select id="trophy"><option>なし</option><option>銅</option><option>銀</option><option>金</option><option>稲妻柄</option><option>虹</option></select></div>
@@ -1191,7 +1195,8 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
   <div class="modal">
     <div class="modalHead"><h2>AT直撃</h2><button class="close" onclick="closeModal('atDirectModal')">×</button></div>
     <div class="formGrid">
-      <div class="full"><div class="label">当選契機</div><select id="atDirectTrigger"><option>GGO詩乃モード</option><option>7図柄打ち抜き</option><option>中段チェリー</option></select></div>
+      <div><div class="label">CZ/AT間ゲーム数</div><input id="atDirectGames" type="number" inputmode="numeric" min="0" placeholder="例：180"></div>
+      <div><div class="label">当選契機</div><select id="atDirectTrigger"><option>GGO詩乃モード</option><option>7図柄打ち抜き</option><option>中段チェリー</option><option>引き戻し</option></select></div>
     </div>
     <button id="startDirectAT" class="saveBtn at">AT当選<br>AT画面へ</button>
   </div>
@@ -1247,7 +1252,7 @@ const rolePatternImages = {
 const roleDisplayName = {};
 
 
-const blank=()=>({state:'normal',playMode:'normal',activeATTrigger:'',pendingATGames:0,estimatedMode:'',currentGame:0,atGames:0,totalGames:0,diff:0,loanRate:46,investmentYen:0,counters:{normal:{},high:{}},atCounters:{},scWins:{normal:0,high:0},sniperHistory:[],history:[],memo:''});
+const blank=()=>({state:'normal',playMode:'normal',activeATTrigger:'',pendingATGames:0,estimatedMode:'',currentGame:0,atGames:0,totalGames:0,diff:0,loanRate:46,investmentYen:0,counters:{normal:{},high:{}},atCounters:{},scWins:{normal:0,high:0},sniperHistory:[],history:[],memo:'',gameInputVersion:3});
 let data=load();
 function load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):blank()}catch(e){return blank()}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
@@ -1277,7 +1282,6 @@ function hardResetAll(){
  render();
  try{
    totalGames.textContent='0G';
-   currentGame.textContent='0G';
    loanRate.value='46';
    investmentYenView.textContent='0円';
    investmentCoinView.textContent='0枚';
@@ -1293,8 +1297,8 @@ function init(){
  if(data.playMode!=='at')data.playMode='normal';if(typeof data.activeATTrigger!=='string')data.activeATTrigger='';if(typeof data.atGames!=='number')data.atGames=0;
  data.scWins=data.scWins||{normal:0,high:0};data.sniperHistory=data.sniperHistory||[];data.history=data.history||[];if(typeof data.diff!=='number')data.diff=0;if(typeof data.loanRate!=='number')data.loanRate=46;if(typeof data.investmentYen!=='number')data.investmentYen=0;if(typeof data.memo!=='string')data.memo='';
 
- // v2.2: 旧データの「累計G」から各履歴の「今回G」を復元する。
- const legacyTotal=Math.max(0,Number(data.totalGames)||0);
+ // v2.3: CZ/AT間ゲーム数は当選時に入力する方式へ統一。
+ // 旧データの履歴値は維持し、画面上で未確定だった currentGame は累計から除外する。
  let prevCum=0;
  data.history.forEach(x=>{
    const cum=Math.max(0,Number(x.cumulative)||0);
@@ -1304,11 +1308,11 @@ function init(){
    if(x.type==='AT')x.atGames=atg;
    prevCum=cum;
  });
- if(typeof data.pendingATGames!=='number'){
-   const completed=data.history.reduce((sum,x)=>sum+(Number(x.games)||0)+(x.type==='AT'?(Number(x.atGames)||0):0),0);
-   data.pendingATGames=data.playMode==='at'?Math.max(0,legacyTotal-completed-(Number(data.currentGame)||0)-(Number(data.atGames)||0)):0;
- }
+ // currentGame はv2.2以前の手入力用。v2.3では使わない。
+ data.currentGame=0;
+ if(typeof data.pendingATGames!=='number')data.pendingATGames=0;
  if(data.playMode!=='at')data.pendingATGames=0;
+ data.gameInputVersion=3;
  recalculateGameTotals();
 }
 init();
@@ -1341,15 +1345,9 @@ function recalculateGameTotals(){
    cumulative+=x.games+atg;
    x.cumulative=cumulative;
  });
- const liveNormal=Math.max(0,Number(data.currentGame)||0);
  const pending=data.playMode==='at'?Math.max(0,Number(data.pendingATGames)||0):0;
  const liveAT=data.playMode==='at'?Math.max(0,Number(data.atGames)||0):0;
- data.totalGames=cumulative+liveNormal+pending+liveAT;
-}
-function changeGames(n){
- data.currentGame=Math.max(0,(Number(data.currentGame)||0)+n);
- recalculateGameTotals();
- save();render();
+ data.totalGames=cumulative+pending+liveAT;
 }
 function changeRole(r,n){data.counters[data.state][r]=Math.max(0,(data.counters[data.state][r]||0)+n);save();render()}
 function changeATGames(n){
@@ -1443,9 +1441,10 @@ function renderSniper(){
  });
 }
 function saveCZResult(atWon){
- const games=Math.max(0,Number(data.currentGame)||0);
+ if(String(czGames.value).trim()===''){alert('CZ/AT間ゲーム数を入力してください');czGames.focus();return;}
+ const games=Math.max(0,Number(czGames.value)||0);
  data.history.push({type:'CZ',games:games,cumulative:data.totalGames,lcd:czLcd.value,trigger:czTrigger.value,mode:czMode.value||data.estimatedMode,voice:czVoice.value,wilderness:wilderness.checked,theEndMode:theEndMode.checked,atWon:!!atWon,createdAt:new Date().toISOString()});
- czLcd.value='';czMode.value='';czVoice.value='';wilderness.checked=false;theEndMode.checked=false;
+ czGames.value='';czLcd.value='';czMode.value='';czVoice.value='';wilderness.checked=false;theEndMode.checked=false;
  data.currentGame=0;
  if(atWon){
    data.playMode='at';data.atGames=0;data.pendingATGames=0;
@@ -1464,11 +1463,13 @@ function saveCZResult(atWon){
 
 function openDirectATModal(){
  if(document.getElementById('atDirectTrigger'))atDirectTrigger.value='GGO詩乃モード';
+ if(document.getElementById('atDirectGames'))atDirectGames.value='';
  openModal('atDirectModal');
 }
 function beginDirectAT(){
+ if(String(atDirectGames.value).trim()===''){alert('CZ/AT間ゲーム数を入力してください');atDirectGames.focus();return;}
  const trigger=atDirectTrigger.value;
- data.pendingATGames=Math.max(0,Number(data.currentGame)||0);
+ data.pendingATGames=Math.max(0,Number(atDirectGames.value)||0);
  data.currentGame=0;
  data.playMode='at';
  data.atGames=0;
@@ -1539,7 +1540,7 @@ function openHistoryEditor(idx){
  const f=document.getElementById('historyEditFields');
  if(x.type==='CZ'){
    f.innerHTML=
-    '<div><div class="label">今回ゲーム数</div><input id="editGames" type="number" inputmode="numeric" min="0" value="'+(Number(x.games)||0)+'"></div>'+ 
+    '<div><div class="label">CZ/AT間ゲーム数</div><input id="editGames" type="number" inputmode="numeric" min="0" value="'+(Number(x.games)||0)+'"></div>'+ 
     '<div><div class="label">液晶ゲーム数</div><input id="editLcd" type="number" inputmode="numeric" min="0" value="'+(x.lcd??'')+'"></div>'+ 
     '<div><div class="label">当選契機</div><select id="editTrigger">'+historyOptions(['ゾーン','CZ間天井','バレットカウンター','強チェリー','チャンス目A','チャンス目B'],x.trigger||'ゾーン')+'</select></div>'+ 
     '<div><div class="label">推定モード</div><select id="editMode">'+historyOptions(['','A','B','C','D','天国'],x.mode||'')+'</select></div>'+ 
@@ -1555,9 +1556,9 @@ function openHistoryEditor(idx){
    miss.addEventListener('click',sync);hit.addEventListener('click',sync);
  }else{
    f.innerHTML=
-    '<div><div class="label">今回ゲーム数</div><input id="editGames" type="number" inputmode="numeric" min="0" value="'+(Number(x.games)||0)+'"></div>'+ 
+    '<div><div class="label">CZ/AT間ゲーム数</div><input id="editGames" type="number" inputmode="numeric" min="0" value="'+(Number(x.games)||0)+'"></div>'+ 
     '<div><div class="label">ATゲーム数</div><input id="editAtGames" type="number" inputmode="numeric" min="0" value="'+(Number(x.atGames)||0)+'"></div>'+ 
-    '<div class="full"><div class="label">当選契機</div><select id="editTrigger">'+historyOptions(['スコードロンバトル（CZ）','GGO詩乃モード','7図柄打ち抜き','中段チェリー'],x.trigger||'スコードロンバトル（CZ）')+'</select></div>'+ 
+    '<div class="full"><div class="label">当選契機</div><select id="editTrigger">'+historyOptions(['スコードロンバトル（CZ）','GGO詩乃モード','7図柄打ち抜き','中段チェリー','引き戻し'],x.trigger||'スコードロンバトル（CZ）')+'</select></div>'+ 
     '<div><div class="label">獲得枚数</div><input id="editCoins" type="number" inputmode="numeric" min="0" value="'+(x.coins??'')+'"></div>'+ 
     '<div><div class="label">トロフィー</div><select id="editTrophy">'+historyOptions(['なし','銅','銀','金','稲妻柄','虹'],x.trophy||'なし')+'</select></div>'+ 
     '<div class="full"><div class="label">終了画面</div><select id="editEndScreen">'+historyOptions(['','キリト&シノン（デフォルト）','制服（奇数示唆）','ソファー（偶数示唆）','木漏れ日（高設定示唆）','夏祭り（高設定示唆強）','幼少期（設定5以上⁉︎）','ワイシャツ（2以上）','お風呂（3以上）','水着（4以上）','パジャマ（6濃厚）','誕生日（示唆なし）'],x.endScreen||'')+'</select></div>'+ 
@@ -1610,7 +1611,7 @@ function renderHistory(){
 }
 function buildDetailText(x){
  const a=[];
- a.push('今回ゲーム数：'+(Number(x.games)||0)+'G');
+ a.push('CZ/AT間ゲーム数：'+(Number(x.games)||0)+'G');
  if(x.type==='CZ'){
   a.push('液晶G：'+(x.lcd||'—'));
   a.push('契機：'+(x.trigger||'—'));
@@ -1632,7 +1633,7 @@ function buildDetailText(x){
 function render(){
  normalBtn.classList.toggle('active',data.state==='normal');highBtn.classList.toggle('active',data.state==='high');
  estimatedMode.value=data.estimatedMode||'';
- totalGames.textContent=data.totalGames+'G';currentGame.textContent=data.currentGame+'G';loanRate.value=String(data.loanRate||46);investmentYenView.textContent=(data.investmentYen||0).toLocaleString()+'円';investmentCoinView.textContent=investmentCoins().toLocaleString()+'枚';
+ totalGames.textContent=data.totalGames+'G';loanRate.value=String(data.loanRate||46);investmentYenView.textContent=(data.investmentYen||0).toLocaleString()+'円';investmentCoinView.textContent=investmentCoins().toLocaleString()+'枚';
  renderCounters();
  if(document.getElementById('atGameView'))atGameView.textContent=(data.atGames||0)+'G';
  renderATCounters();renderSniper();renderRoleStats();
@@ -1658,8 +1659,6 @@ function render(){
 normalBtn.onclick=()=>{data.state='normal';save();render()};
 highBtn.onclick=()=>{data.state='high';save();render()};
 estimatedMode.onchange=()=>{data.estimatedMode=estimatedMode.value;save();render()};
-m1.onclick=()=>changeGames(-1);p1.onclick=()=>changeGames(1);m10.onclick=()=>changeGames(-10);p10.onclick=()=>changeGames(10);a50.onclick=()=>changeGames(50);a100.onclick=()=>changeGames(100);
-
 
 loanRate.onchange=()=>{data.loanRate=Number(loanRate.value)||46;save();render()};investMinus1000.onclick=()=>changeInvestmentYen(-1000);investPlus1000.onclick=()=>changeInvestmentYen(1000);investPlus5000.onclick=()=>changeInvestmentYen(5000);investPlus10000.onclick=()=>changeInvestmentYen(10000);
 resetCounters.onclick=()=>{['normal','high'].forEach(s=>roles.forEach(r=>data.counters[s][r]=0));roles.forEach(r=>data.atCounters[r]=0);data.scWins={normal:0,high:0};save();render()};
