@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'sao2-counter-v2-safearea';
+const CACHE_NAME = 'sao2-counter-v2-1-history-directat';
 const APP_SHELL = [
   './',
   './index.html',

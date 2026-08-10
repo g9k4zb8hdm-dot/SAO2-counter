@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050b14">
-<title>SAO2 実戦カウンター v2.0</title>
+<title>SAO2 実戦カウンター v2.1</title>
 <style>
 :root{
   --bg:#050b14;--panel:#0b1525;--panel2:#0e1b2f;--panel3:#12213a;
@@ -86,6 +86,13 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
 .white{background:#fff}.bluec{background:#3b82f6}.yellow{background:#f4c542}.green{background:#59d47c}.redc{background:#f13a3a}.purplec{background:#a53fd1}.none{background:#65758a}
 .more{width:26px;height:26px;border-radius:7px;border:1px solid var(--line2);background:#17253c;color:white;font-weight:900;font-size:10px}
+.historyActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.historyActions button{min-height:38px;border-radius:9px;border:1px solid var(--line2);color:#fff;font-weight:900;font-size:12px}
+.historyEditBtn{background:#173b82}.historyDeleteBtn{background:#65171d;border-color:#8b1f27!important}
+.editResultSeg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.editResultSeg button{min-height:40px;border:1px solid var(--line2);border-radius:9px;background:#17253c;color:#aebdd0;font-weight:900}
+.editResultSeg button.active{background:#1b50d5;color:#fff;border-color:#3a72ff}
+.editResultSeg button.active.miss{background:#7a1a20;border-color:#b1262e}
 .recordBar{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:sticky;bottom:calc(64px + min(env(safe-area-inset-bottom),34px));z-index:5}
 .recordBig{min-height:42px;border:0;border-radius:10px;color:white;font-weight:950;font-size:11px}
 .recordBig.cz{background:linear-gradient(135deg,#1649cc,#2d67ff)}.recordBig.at{background:linear-gradient(135deg,#ae1d24,#e72c34)}
@@ -910,7 +917,7 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
 
     <div class="recordBar">
       <button class="recordBig cz" onclick="openModal('czModal')">スコードロンバトル（CZ）記録</button>
-      <button class="recordBig at" onclick="openModal('atModal')">バレット・オブ・バレッツ（AT）記録</button>
+      <button class="recordBig at" onclick="openDirectATModal()">AT直撃</button>
     </div>
   </section>
 
@@ -1169,16 +1176,38 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
   <div class="modal">
     <div class="modalHead"><h2>バレット・オブ・バレッツ（AT）記録</h2><button class="close" onclick="closeModal('atModal')">×</button></div>
     <div class="formGrid">
-      <div><div class="label">当選契機</div><select id="atTrigger"><option>スコードロンバトル（CZ）</option><option>直撃</option><option>ウルティマチェリー</option><option>AT間天井</option></select></div>
+      <div><div class="label">当選契機</div><select id="atTrigger"><option>スコードロンバトル（CZ）</option><option>GGO詩乃モード</option><option>7図柄打ち抜き</option><option>中段チェリー</option></select></div>
       <div><div class="label">獲得枚数</div><input id="atCoins" type="number" inputmode="numeric" min="0" placeholder="例：1250"></div>
       <div class="full"><div class="label">終了画面</div><select id="endScreen"><option value="">未選択</option><option>キリト&シノン（デフォルト）</option><option>制服（奇数示唆）</option><option>ソファー（偶数示唆）</option><option>木漏れ日（高設定示唆）</option><option>夏祭り（高設定示唆強）</option><option>幼少期（設定5以上⁉︎）</option><option>ワイシャツ（2以上）</option><option>お風呂（3以上）</option><option>水着（4以上）</option><option>パジャマ（6濃厚）</option><option>誕生日（示唆なし）</option></select></div>
       <div><div class="label">トロフィー</div><select id="trophy"><option>なし</option><option>銅</option><option>銀</option><option>金</option><option>稲妻柄</option><option>虹</option></select></div>
       <div><div class="label">終了画面ボイス</div><select id="voice"><option value="">未選択</option><option value="白">白｜信じてるから……</option><option value="青">青｜一緒に頑張ろ……ね</option><option value="黄">黄｜私とあたるまで 勝ち上がって来なさいよ</option><option value="緑">緑｜キリト……あなたの強さの理由を見させてもらうわ</option><option value="赤">赤｜へカートⅡ……お願い。弱い私に、力を貸して。</option><option value="紫">紫｜LUKガン上げなのあなた!? だからかぁ……</option></select></div>
     </div>
-    <button id="recordAT" class="saveBtn at">ATを記録</button>
+    <button id="recordAT" class="saveBtn at">AT結果を記録</button>
   </div>
 </div>
 
+
+<div id="atDirectModal" class="modalBack">
+  <div class="modal">
+    <div class="modalHead"><h2>AT直撃</h2><button class="close" onclick="closeModal('atDirectModal')">×</button></div>
+    <div class="formGrid">
+      <div class="full"><div class="label">当選契機</div><select id="atDirectTrigger"><option>GGO詩乃モード</option><option>7図柄打ち抜き</option><option>中段チェリー</option></select></div>
+    </div>
+    <button id="startDirectAT" class="saveBtn at">AT当選<br>AT画面へ</button>
+  </div>
+</div>
+
+<div id="historyEditModal" class="modalBack">
+  <div class="modal">
+    <div class="modalHead"><h2 id="historyEditTitle">履歴を修正</h2><button class="close" onclick="closeModal('historyEditModal')">×</button></div>
+    <input id="historyEditIndex" type="hidden">
+    <div id="historyEditFields" class="formGrid"></div>
+    <div class="historyActions">
+      <button id="deleteHistoryItem" class="historyDeleteBtn">この履歴を削除</button>
+      <button id="saveHistoryEdit" class="historyEditBtn">修正を保存</button>
+    </div>
+  </div>
+</div>
 
 <div id="sniperModal" class="modalBack">
   <div class="modal">
@@ -1218,7 +1247,7 @@ const rolePatternImages = {
 const roleDisplayName = {};
 
 
-const blank=()=>({state:'normal',playMode:'normal',estimatedMode:'',currentGame:0,atGames:0,totalGames:0,diff:0,loanRate:46,investmentYen:0,counters:{normal:{},high:{}},atCounters:{},scWins:{normal:0,high:0},sniperHistory:[],history:[],memo:''});
+const blank=()=>({state:'normal',playMode:'normal',activeATTrigger:'',estimatedMode:'',currentGame:0,atGames:0,totalGames:0,diff:0,loanRate:46,investmentYen:0,counters:{normal:{},high:{}},atCounters:{},scWins:{normal:0,high:0},sniperHistory:[],history:[],memo:''});
 let data=load();
 function load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):blank()}catch(e){return blank()}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
@@ -1228,6 +1257,7 @@ function hardResetAll(){
  data=blank();
  data.state='normal';
  data.playMode='normal';
+ data.activeATTrigger='';
  data.estimatedMode='';
  data.currentGame=0;
  data.atGames=0;
@@ -1259,7 +1289,7 @@ function init(){
  ['normal','high'].forEach(s=>{if(data.counters[s] && typeof data.counters[s]['弱チャンス目']==='number' && typeof data.counters[s]['弱チャンス目']!=='number'){data.counters[s]['弱チャンス目']=data.counters[s]['弱チャンス目'];}});
  ['normal','high'].forEach(s=>{data.counters[s]=data.counters[s]||{};roles.forEach(r=>{if(typeof data.counters[s][r]!=='number')data.counters[s][r]=0})});
  data.atCounters=data.atCounters||{};roles.forEach(r=>{if(typeof data.atCounters[r]!=='number')data.atCounters[r]=0});
- if(data.playMode!=='at')data.playMode='normal';if(typeof data.atGames!=='number')data.atGames=0;
+ if(data.playMode!=='at')data.playMode='normal';if(typeof data.activeATTrigger!=='string')data.activeATTrigger='';if(typeof data.atGames!=='number')data.atGames=0;
  data.scWins=data.scWins||{normal:0,high:0};data.sniperHistory=data.sniperHistory||[];data.history=data.history||[];if(typeof data.diff!=='number')data.diff=0;if(typeof data.loanRate!=='number')data.loanRate=46;if(typeof data.investmentYen!=='number')data.investmentYen=0;if(typeof data.memo!=='string')data.memo='';
 }
 init();
@@ -1389,12 +1419,29 @@ function saveCZResult(atWon){
  data.currentGame=0;
  if(atWon){
    data.playMode='at';data.atGames=0;
-   if(document.getElementById('atTrigger'))atTrigger.value='スコードロンバトル（CZ）';
+   data.activeATTrigger='スコードロンバトル（CZ）';
+   if(document.getElementById('atTrigger'))atTrigger.value=data.activeATTrigger;
  }else{
    data.playMode='normal';
+   data.activeATTrigger='';
  }
  save();closeModal('czModal');
  if(atWon)showScreen('at');else showScreen('counter');
+}
+
+
+function openDirectATModal(){
+ if(document.getElementById('atDirectTrigger'))atDirectTrigger.value='GGO詩乃モード';
+ openModal('atDirectModal');
+}
+function beginDirectAT(){
+ const trigger=atDirectTrigger.value;
+ data.currentGame=0;
+ data.playMode='at';
+ data.atGames=0;
+ data.activeATTrigger=trigger;
+ if(document.getElementById('atTrigger'))atTrigger.value=trigger;
+ save();closeModal('atDirectModal');showScreen('at');
 }
 
 
@@ -1448,19 +1495,81 @@ function compactLabel(x){
  const lcd=x.type==='CZ'?(x.lcd?x.lcd+'G':'—'):'—';
  return {voice,lcd};
 }
+function historyOptions(values,selected){
+ return values.map(v=>'<option'+(v===selected?' selected':'')+'>'+v+'</option>').join('');
+}
+function openHistoryEditor(idx){
+ const x=data.history[idx];if(!x)return;
+ historyEditIndex.value=String(idx);
+ historyEditTitle.textContent=(x.type==='CZ'?'CZ':'AT')+'履歴を修正';
+ const f=document.getElementById('historyEditFields');
+ if(x.type==='CZ'){
+   f.innerHTML=
+    '<div><div class="label">累計ゲーム数</div><input id="editCum" type="number" inputmode="numeric" min="0" value="'+(Number(x.cumulative)||0)+'"></div>'+ 
+    '<div><div class="label">液晶ゲーム数</div><input id="editLcd" type="number" inputmode="numeric" min="0" value="'+(x.lcd??'')+'"></div>'+ 
+    '<div><div class="label">当選契機</div><select id="editTrigger">'+historyOptions(['ゾーン','CZ間天井','バレットカウンター','強チェリー','チャンス目A','チャンス目B'],x.trigger||'ゾーン')+'</select></div>'+ 
+    '<div><div class="label">推定モード</div><select id="editMode">'+historyOptions(['','A','B','C','D','天国'],x.mode||'')+'</select></div>'+ 
+    '<div class="full"><div class="label">終了画面ボイス</div><select id="editVoice">'+historyOptions(['','白','青','黄','緑','赤','紫'],x.voice||'')+'</select></div>'+ 
+    '<div class="full"><div class="label">CZ結果</div><div class="editResultSeg"><button id="editAtMiss" class="'+(x.atWon===false?'active miss':'')+'">AT非当選</button><button id="editAtHit" class="'+(x.atWon===true?'active':'')+'">AT当選</button></div></div>'+ 
+    '<div class="full checks"><label class="check"><input id="editWild" type="checkbox" '+(x.wilderness?'checked':'')+'>曠野の決戦</label><label class="check"><input id="editEnd" type="checkbox" '+(x.theEndMode?'checked':'')+'>確定THE ENDモード</label></div>';
+   let editAtWon=x.atWon===true;
+   const miss=document.getElementById('editAtMiss'),hit=document.getElementById('editAtHit');
+   miss.onclick=()=>{editAtWon=false;miss.classList.add('active','miss');hit.classList.remove('active')};
+   hit.onclick=()=>{editAtWon=true;hit.classList.add('active');miss.classList.remove('active','miss')};
+   f.dataset.atWon=editAtWon?'1':'0';
+   const sync=()=>{f.dataset.atWon=hit.classList.contains('active')?'1':'0'};
+   miss.addEventListener('click',sync);hit.addEventListener('click',sync);
+ }else{
+   f.innerHTML=
+    '<div><div class="label">累計ゲーム数</div><input id="editCum" type="number" inputmode="numeric" min="0" value="'+(Number(x.cumulative)||0)+'"></div>'+ 
+    '<div><div class="label">ATゲーム数</div><input id="editAtGames" type="number" inputmode="numeric" min="0" value="'+(Number(x.atGames)||0)+'"></div>'+ 
+    '<div class="full"><div class="label">当選契機</div><select id="editTrigger">'+historyOptions(['スコードロンバトル（CZ）','GGO詩乃モード','7図柄打ち抜き','中段チェリー'],x.trigger||'スコードロンバトル（CZ）')+'</select></div>'+ 
+    '<div><div class="label">獲得枚数</div><input id="editCoins" type="number" inputmode="numeric" min="0" value="'+(x.coins??'')+'"></div>'+ 
+    '<div><div class="label">トロフィー</div><select id="editTrophy">'+historyOptions(['なし','銅','銀','金','稲妻柄','虹'],x.trophy||'なし')+'</select></div>'+ 
+    '<div class="full"><div class="label">終了画面</div><select id="editEndScreen">'+historyOptions(['','キリト&シノン（デフォルト）','制服（奇数示唆）','ソファー（偶数示唆）','木漏れ日（高設定示唆）','夏祭り（高設定示唆強）','幼少期（設定5以上⁉︎）','ワイシャツ（2以上）','お風呂（3以上）','水着（4以上）','パジャマ（6濃厚）','誕生日（示唆なし）'],x.endScreen||'')+'</select></div>'+ 
+    '<div class="full"><div class="label">終了画面ボイス</div><select id="editVoice">'+historyOptions(['','白','青','黄','緑','赤','紫'],x.voice||'')+'</select></div>';
+ }
+ openModal('historyEditModal');
+}
+function saveHistoryEditor(){
+ const idx=Number(historyEditIndex.value),x=data.history[idx];if(!x)return;
+ x.cumulative=Math.max(0,Number(document.getElementById('editCum').value)||0);
+ x.trigger=document.getElementById('editTrigger').value;
+ x.voice=document.getElementById('editVoice').value;
+ if(x.type==='CZ'){
+   x.lcd=document.getElementById('editLcd').value;
+   x.mode=document.getElementById('editMode').value;
+   x.atWon=document.getElementById('historyEditFields').dataset.atWon==='1';
+   x.wilderness=document.getElementById('editWild').checked;
+   x.theEndMode=document.getElementById('editEnd').checked;
+ }else{
+   x.atGames=Math.max(0,Number(document.getElementById('editAtGames').value)||0);
+   x.coins=document.getElementById('editCoins').value;
+   x.trophy=document.getElementById('editTrophy').value;
+   x.endScreen=document.getElementById('editEndScreen').value;
+ }
+ save();closeModal('historyEditModal');render();
+}
+function deleteHistoryEditor(){
+ const idx=Number(historyEditIndex.value),x=data.history[idx];if(!x)return;
+ if(!confirm((x.type==='CZ'?'CZ':'AT')+'のこの履歴を削除しますか？'))return;
+ data.history.splice(idx,1);save();closeModal('historyEditModal');render();
+}
 function renderHistory(){
  const compact=document.getElementById('historyCompact');compact.innerHTML='';
  const detail=document.getElementById('historyDetail');detail.innerHTML='';
  [...data.history].reverse().forEach((x,ri)=>{
    const idx=data.history.length-1-ri, c=compactLabel(x);
    const row=document.createElement('div');row.className='histRow';
-   row.innerHTML='<div class="tag '+(x.type==='AT'?'at':'cz')+'">'+x.type+'</div><div class="histCum">'+x.cumulative+'G</div><div class="histLcd">'+c.lcd+'</div><div class="histVoice">'+c.voice+'</div><button class="more">•••</button>';
-   row.querySelector('.more').onclick=()=>alert(buildDetailText(x));
+   row.innerHTML='<div class="tag '+(x.type==='AT'?'at':'cz')+'">'+x.type+'</div><div class="histCum">'+x.cumulative+'G</div><div class="histLcd">'+c.lcd+'</div><div class="histVoice">'+c.voice+'</div><button class="more" aria-label="履歴を修正">•••</button>';
+   row.querySelector('.more').onclick=()=>openHistoryEditor(idx);
    compact.append(row);
 
    const d=document.createElement('div');d.className='card';
    d.style.marginBottom='8px';
-   d.innerHTML='<div class="sectionTitle"><span><span class="tag '+(x.type==='AT'?'at':'cz')+'" style="display:inline-block;margin-right:8px">'+x.type+'</span>累計 '+x.cumulative+'G</span></div><div class="muted" style="white-space:pre-wrap;font-size:13px;color:#d4dfed">'+buildDetailText(x)+'</div>';
+   d.innerHTML='<div class="sectionTitle"><span><span class="tag '+(x.type==='AT'?'at':'cz')+'" style="display:inline-block;margin-right:8px">'+x.type+'</span>累計 '+x.cumulative+'G</span></div><div class="muted" style="white-space:pre-wrap;font-size:13px;color:#d4dfed">'+buildDetailText(x)+'</div><div class="historyActions"><button class="historyEditBtn">修正</button><button class="historyDeleteBtn">削除</button></div>';
+   d.querySelector('.historyEditBtn').onclick=()=>openHistoryEditor(idx);
+   d.querySelector('.historyDeleteBtn').onclick=()=>{historyEditIndex.value=String(idx);deleteHistoryEditor()};
    detail.append(d);
  });
 }
@@ -1523,10 +1632,13 @@ scHPlus.onclick=()=>{data.scWins.high++;save();render()};scHMinus.onclick=()=>{d
 
 recordCZMiss.onclick=()=>saveCZResult(false);
 recordCZAT.onclick=()=>saveCZResult(true);
+startDirectAT.onclick=()=>beginDirectAT();
+saveHistoryEdit.onclick=()=>saveHistoryEditor();
+deleteHistoryItem.onclick=()=>deleteHistoryEditor();
 recordAT.onclick=()=>{
  data.history.push({type:'AT',cumulative:data.totalGames,trigger:atTrigger.value,coins:atCoins.value,endScreen:endScreen.value,trophy:trophy.value,voice:voice.value,atGames:data.atGames||0,createdAt:new Date().toISOString()});
  atCoins.value='';endScreen.value='';trophy.value='なし';voice.value='';
- data.currentGame=0;data.atGames=0;data.playMode='normal';
+ data.currentGame=0;data.atGames=0;data.playMode='normal';data.activeATTrigger='';
  save();closeModal('atModal');showScreen('counter');render();
 };
 
@@ -1535,7 +1647,7 @@ atM10.onclick=()=>changeATGames(-10);atP10.onclick=()=>changeATGames(10);atP50.o
 openSniper.onclick=()=>openModal('sniperModal');
 sniperWin.onclick=()=>{data.sniperHistory.push({opponent:sniperOpponent.value,win:true,createdAt:new Date().toISOString()});save();closeModal('sniperModal');render()};
 sniperLose.onclick=()=>{data.sniperHistory.push({opponent:sniperOpponent.value,win:false,createdAt:new Date().toISOString()});save();closeModal('sniperModal');render()};
-finishATBtn.onclick=()=>{atTrigger.value=atTrigger.value||'スコードロンバトル（CZ）';openModal('atModal')};
+finishATBtn.onclick=()=>{atTrigger.value=data.activeATTrigger||atTrigger.value||'スコードロンバトル（CZ）';openModal('atModal')};
 
 clearHistory.onclick=()=>{data.history=[];save();render()};
 memoArea.oninput=()=>{data.memo=memoArea.value;save()};
