@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'sao2-counter-v2-3-event-game-input';
+const CACHE_NAME = 'sao2-counter-v2-4-at-end-cumulative';
 const APP_SHELL = [
   './',
   './index.html',

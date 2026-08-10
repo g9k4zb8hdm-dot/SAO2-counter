@@ -934,16 +934,9 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
       <div class="atGamesBox">
         <div class="statLabel" style="text-align:center">ATゲーム数</div>
         <div class="atGameMain">
-          <button id="atM1" class="atRound">−</button>
-          <div id="atGameView" class="atGameValue">0G</div>
-          <button id="atP1" class="atRound">＋</button>
+          <div id="atGameView" class="atGameValue">終了時に計算</div>
         </div>
-        <div class="atQuick">
-          <button id="atP10">+10G</button>
-          <button id="atP50">+50G</button>
-          <button id="atP100">+100G</button>
-          <button id="atM10">-10G</button>
-        </div>
+        <div class="atCounterNote" style="text-align:center">AT終了時に、店のゲームカウンターに表示されている累計ゲーム数を入力してください。</div>
       </div>
     </div>
 
@@ -1180,6 +1173,7 @@ select,input,textarea{width:100%;background:#081321;color:white;border:1px solid
   <div class="modal">
     <div class="modalHead"><h2>バレット・オブ・バレッツ（AT）記録</h2><button class="close" onclick="closeModal('atModal')">×</button></div>
     <div class="formGrid">
+      <div class="full"><div class="label">AT終了時の累計ゲーム数（店カウンター）</div><input id="atEndCumulative" type="number" inputmode="numeric" min="0" placeholder="例：1250"></div>
       <div><div class="label">当選契機</div><select id="atTrigger"><option>スコードロンバトル（CZ）</option><option>GGO詩乃モード</option><option>7図柄打ち抜き</option><option>中段チェリー</option><option>引き戻し</option></select></div>
       <div><div class="label">獲得枚数</div><input id="atCoins" type="number" inputmode="numeric" min="0" placeholder="例：1250"></div>
       <div class="full"><div class="label">終了画面</div><select id="endScreen"><option value="">未選択</option><option>キリト&シノン（デフォルト）</option><option>制服（奇数示唆）</option><option>ソファー（偶数示唆）</option><option>木漏れ日（高設定示唆）</option><option>夏祭り（高設定示唆強）</option><option>幼少期（設定5以上⁉︎）</option><option>ワイシャツ（2以上）</option><option>お風呂（3以上）</option><option>水着（4以上）</option><option>パジャマ（6濃厚）</option><option>誕生日（示唆なし）</option></select></div>
@@ -1252,7 +1246,7 @@ const rolePatternImages = {
 const roleDisplayName = {};
 
 
-const blank=()=>({state:'normal',playMode:'normal',activeATTrigger:'',pendingATGames:0,estimatedMode:'',currentGame:0,atGames:0,totalGames:0,diff:0,loanRate:46,investmentYen:0,counters:{normal:{},high:{}},atCounters:{},scWins:{normal:0,high:0},sniperHistory:[],history:[],memo:'',gameInputVersion:3});
+const blank=()=>({state:'normal',playMode:'normal',activeATTrigger:'',pendingATGames:0,atStartCumulative:0,estimatedMode:'',currentGame:0,atGames:0,totalGames:0,diff:0,loanRate:46,investmentYen:0,counters:{normal:{},high:{}},atCounters:{},scWins:{normal:0,high:0},sniperHistory:[],history:[],memo:'',gameInputVersion:4});
 let data=load();
 function load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):blank()}catch(e){return blank()}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
@@ -1264,6 +1258,7 @@ function hardResetAll(){
  data.playMode='normal';
  data.activeATTrigger='';
  data.pendingATGames=0;
+ data.atStartCumulative=0;
  data.estimatedMode='';
  data.currentGame=0;
  data.atGames=0;
@@ -1290,11 +1285,12 @@ function hardResetAll(){
 }
 
 function init(){
+ const needsATStartMigration=typeof data.atStartCumulative!=='number';
  data.counters=data.counters||{normal:{},high:{}};
  ['normal','high'].forEach(s=>{if(data.counters[s] && typeof data.counters[s]['弱チャンス目']==='number' && typeof data.counters[s]['弱チャンス目']!=='number'){data.counters[s]['弱チャンス目']=data.counters[s]['弱チャンス目'];}});
  ['normal','high'].forEach(s=>{data.counters[s]=data.counters[s]||{};roles.forEach(r=>{if(typeof data.counters[s][r]!=='number')data.counters[s][r]=0})});
  data.atCounters=data.atCounters||{};roles.forEach(r=>{if(typeof data.atCounters[r]!=='number')data.atCounters[r]=0});
- if(data.playMode!=='at')data.playMode='normal';if(typeof data.activeATTrigger!=='string')data.activeATTrigger='';if(typeof data.atGames!=='number')data.atGames=0;
+ if(data.playMode!=='at')data.playMode='normal';if(typeof data.activeATTrigger!=='string')data.activeATTrigger='';if(typeof data.atGames!=='number')data.atGames=0;if(typeof data.atStartCumulative!=='number')data.atStartCumulative=0;
  data.scWins=data.scWins||{normal:0,high:0};data.sniperHistory=data.sniperHistory||[];data.history=data.history||[];if(typeof data.diff!=='number')data.diff=0;if(typeof data.loanRate!=='number')data.loanRate=46;if(typeof data.investmentYen!=='number')data.investmentYen=0;if(typeof data.memo!=='string')data.memo='';
 
  // v2.3: CZ/AT間ゲーム数は当選時に入力する方式へ統一。
@@ -1311,9 +1307,10 @@ function init(){
  // currentGame はv2.2以前の手入力用。v2.3では使わない。
  data.currentGame=0;
  if(typeof data.pendingATGames!=='number')data.pendingATGames=0;
- if(data.playMode!=='at')data.pendingATGames=0;
- data.gameInputVersion=3;
+ if(data.playMode!=='at'){data.pendingATGames=0;data.atStartCumulative=0;}
+ data.gameInputVersion=4;
  recalculateGameTotals();
+ if(data.playMode==='at'&&needsATStartMigration)data.atStartCumulative=data.totalGames;
 }
 init();
 
@@ -1346,15 +1343,9 @@ function recalculateGameTotals(){
    x.cumulative=cumulative;
  });
  const pending=data.playMode==='at'?Math.max(0,Number(data.pendingATGames)||0):0;
- const liveAT=data.playMode==='at'?Math.max(0,Number(data.atGames)||0):0;
- data.totalGames=cumulative+pending+liveAT;
+ data.totalGames=cumulative+pending;
 }
 function changeRole(r,n){data.counters[data.state][r]=Math.max(0,(data.counters[data.state][r]||0)+n);save();render()}
-function changeATGames(n){
- data.atGames=Math.max(0,(Number(data.atGames)||0)+n);
- recalculateGameTotals();
- save();render();
-}
 function changeATRole(r,n){data.atCounters[r]=Math.max(0,(data.atCounters[r]||0)+n);save();render()}
 function totalRole(r){return (data.counters.normal[r]||0)+(data.counters.high[r]||0)+(data.atCounters[r]||0)}
 function freq(r){const c=totalRole(r);return c&&data.totalGames?'1/'+(data.totalGames/c).toFixed((data.totalGames/c)<100?1:0):'—'}
@@ -1448,6 +1439,8 @@ function saveCZResult(atWon){
  data.currentGame=0;
  if(atWon){
    data.playMode='at';data.atGames=0;data.pendingATGames=0;
+   recalculateGameTotals();
+   data.atStartCumulative=data.totalGames;
    data.activeATTrigger='スコードロンバトル（CZ）';
    if(document.getElementById('atTrigger'))atTrigger.value=data.activeATTrigger;
  }else{
@@ -1476,6 +1469,7 @@ function beginDirectAT(){
  data.activeATTrigger=trigger;
  if(document.getElementById('atTrigger'))atTrigger.value=trigger;
  recalculateGameTotals();
+ data.atStartCumulative=data.totalGames;
  save();closeModal('atDirectModal');showScreen('at');
 }
 
@@ -1483,9 +1477,7 @@ function beginDirectAT(){
 function completedATGames(){
  return data.history.filter(x=>x.type==='AT').reduce((sum,x)=>sum+(Number(x.atGames)||0),0);
 }
-function totalATTrackedGames(){
- return completedATGames() + (data.playMode==='at' ? (data.atGames||0) : 0);
-}
+function totalATTrackedGames(){return completedATGames();}
 function totalNormalTrackedGames(){
  return Math.max(0,(data.totalGames||0)-totalATTrackedGames());
 }
@@ -1557,7 +1549,7 @@ function openHistoryEditor(idx){
  }else{
    f.innerHTML=
     '<div><div class="label">CZ/AT間ゲーム数</div><input id="editGames" type="number" inputmode="numeric" min="0" value="'+(Number(x.games)||0)+'"></div>'+ 
-    '<div><div class="label">ATゲーム数</div><input id="editAtGames" type="number" inputmode="numeric" min="0" value="'+(Number(x.atGames)||0)+'"></div>'+ 
+    '<div><div class="label">AT終了時累計ゲーム数</div><input id="editAtEndCumulative" type="number" inputmode="numeric" min="0" value="'+(Number(x.cumulative)||0)+'"></div>'+ 
     '<div class="full"><div class="label">当選契機</div><select id="editTrigger">'+historyOptions(['スコードロンバトル（CZ）','GGO詩乃モード','7図柄打ち抜き','中段チェリー','引き戻し'],x.trigger||'スコードロンバトル（CZ）')+'</select></div>'+ 
     '<div><div class="label">獲得枚数</div><input id="editCoins" type="number" inputmode="numeric" min="0" value="'+(x.coins??'')+'"></div>'+ 
     '<div><div class="label">トロフィー</div><select id="editTrophy">'+historyOptions(['なし','銅','銀','金','稲妻柄','虹'],x.trophy||'なし')+'</select></div>'+ 
@@ -1578,7 +1570,11 @@ function saveHistoryEditor(){
    x.wilderness=document.getElementById('editWild').checked;
    x.theEndMode=document.getElementById('editEnd').checked;
  }else{
-   x.atGames=Math.max(0,Number(document.getElementById('editAtGames').value)||0);
+   const prevCum=idx>0?(Number(data.history[idx-1].cumulative)||0):0;
+   const atStart=prevCum+(Number(x.games)||0);
+   const endCum=Math.max(0,Number(document.getElementById('editAtEndCumulative').value)||0);
+   if(endCum<atStart){alert('AT終了時の累計ゲーム数はAT当選時（'+atStart+'G）以上で入力してください');return;}
+   x.atGames=endCum-atStart;
    x.coins=document.getElementById('editCoins').value;
    x.trophy=document.getElementById('editTrophy').value;
    x.endScreen=document.getElementById('editEndScreen').value;
@@ -1635,7 +1631,7 @@ function render(){
  estimatedMode.value=data.estimatedMode||'';
  totalGames.textContent=data.totalGames+'G';loanRate.value=String(data.loanRate||46);investmentYenView.textContent=(data.investmentYen||0).toLocaleString()+'円';investmentCoinView.textContent=investmentCoins().toLocaleString()+'枚';
  renderCounters();
- if(document.getElementById('atGameView'))atGameView.textContent=(data.atGames||0)+'G';
+ if(document.getElementById('atGameView'))atGameView.textContent=data.playMode==='at'?'終了時に計算':'0G';
  renderATCounters();renderSniper();renderRoleStats();
  const nT=data.counters.normal['スイカ']||0,hT=data.counters.high['スイカ']||0;
  scN.textContent=data.scWins.normal+' / '+nT;scH.textContent=data.scWins.high+' / '+hT;
@@ -1672,15 +1668,18 @@ startDirectAT.onclick=()=>beginDirectAT();
 saveHistoryEdit.onclick=()=>saveHistoryEditor();
 deleteHistoryItem.onclick=()=>deleteHistoryEditor();
 recordAT.onclick=()=>{
- data.history.push({type:'AT',games:Math.max(0,Number(data.pendingATGames)||0),cumulative:data.totalGames,trigger:atTrigger.value,coins:atCoins.value,endScreen:endScreen.value,trophy:trophy.value,voice:voice.value,atGames:Math.max(0,Number(data.atGames)||0),createdAt:new Date().toISOString()});
- atCoins.value='';endScreen.value='';trophy.value='なし';voice.value='';
- data.currentGame=0;data.atGames=0;data.pendingATGames=0;data.playMode='normal';data.activeATTrigger='';
+ if(String(atEndCumulative.value).trim()===''){alert('店のゲームカウンターの累計ゲーム数を入力してください');atEndCumulative.focus();return;}
+ const endCum=Math.max(0,Number(atEndCumulative.value)||0);
+ const startCum=Math.max(0,Number(data.atStartCumulative)||0);
+ if(endCum<startCum){alert('AT終了時の累計ゲーム数はAT当選時（'+startCum+'G）以上で入力してください');atEndCumulative.focus();return;}
+ const calculatedATGames=endCum-startCum;
+ data.history.push({type:'AT',games:Math.max(0,Number(data.pendingATGames)||0),cumulative:endCum,trigger:atTrigger.value,coins:atCoins.value,endScreen:endScreen.value,trophy:trophy.value,voice:voice.value,atGames:calculatedATGames,createdAt:new Date().toISOString()});
+ atEndCumulative.value='';atCoins.value='';endScreen.value='';trophy.value='なし';voice.value='';
+ data.currentGame=0;data.atGames=0;data.pendingATGames=0;data.atStartCumulative=0;data.playMode='normal';data.activeATTrigger='';
  recalculateGameTotals();
  save();closeModal('atModal');showScreen('counter');render();
 };
 
-atM1.onclick=()=>changeATGames(-1);atP1.onclick=()=>changeATGames(1);
-atM10.onclick=()=>changeATGames(-10);atP10.onclick=()=>changeATGames(10);atP50.onclick=()=>changeATGames(50);atP100.onclick=()=>changeATGames(100);
 openSniper.onclick=()=>openModal('sniperModal');
 sniperWin.onclick=()=>{data.sniperHistory.push({opponent:sniperOpponent.value,win:true,createdAt:new Date().toISOString()});save();closeModal('sniperModal');render()};
 sniperLose.onclick=()=>{data.sniperHistory.push({opponent:sniperOpponent.value,win:false,createdAt:new Date().toISOString()});save();closeModal('sniperModal');render()};
