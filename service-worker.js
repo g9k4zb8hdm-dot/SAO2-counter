@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'sao2-counter-v2-1-history-directat';
+const CACHE_NAME = 'sao2-counter-v2-2-game-separation';
 const APP_SHELL = [
   './',
   './index.html',
