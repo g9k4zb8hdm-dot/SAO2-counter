@@ -1,12 +1,20 @@
 
-const CACHE_NAME = 'sao2-counter-v2-4-at-end-cumulative';
+const CACHE_NAME = 'sao2-counter-v2-5-ui-refinement';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-180.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './role-image-1.png',
+  './role-image-2.png',
+  './role-image-3.png',
+  './role-image-4.png',
+  './role-image-5.png',
+  './role-image-6.png',
+  './role-image-7.png',
+  './role-image-8.png'
 ];
 
 self.addEventListener('install', event => {
